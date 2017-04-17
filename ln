@@ -1,0 +1,52 @@
+#!/bin/bash
+#
+# ln -s --relative SRC DST
+#
+# This Works is placed under the terms of the Copyright Less License,
+# see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
+
+OOPS() { { printf '%q OOPS:' "$(basename "$0")"; printf ' %q' "$@"; printf '\n'; } >&2; exit 23; }
+o() { "$@" || OOPS exec "$?:" "$@"; }
+
+rel=false
+sym=false
+OPTS=()
+ARGS=("$@")
+while	case "$1" in
+	(--relative)	rel=:;;
+	(-s)		sym=:;;
+	(-[hnvFfi])	OPTS+=("$1");;
+	(*)		false;;
+	esac
+do
+	shift
+done
+
+! $rel && exec /bin/ln "${ARGS[@]}"
+$sym || OOPS --relative needs -s
+case "$1" in
+--)	shift;;
+-*)	OOPS this shim does not support all options, sorry;;
+esac
+
+HERE="$(o dirname "$0")" || exit
+
+[ 1 -lt "$#" ] || OOPS option -s needs: src.. target
+
+TARG="${@:$#}"
+
+if	[ ! -d "$TARG" ]
+then
+	[ 2 -lt "$#" ] || OOPS "$TARG" must be an existing directory
+	TARG="$(dirname "$TARG")"
+fi
+
+OPTS+=(--)
+for arg in "${@:1:$#-1}"
+do
+	SRC="$("$HERE/relpath" "$TARG" "$arg")" || OOPS "$arg" cannot calculate relative path
+	OPTS+=("$SRC")
+done
+
+exec /bin/ln -s "${OPTS[@]}" "$TARG"
+

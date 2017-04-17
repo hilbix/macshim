@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# realpath arg
+#	get the real path of arg
+#	path may be missing
+#
+# This Works is placed under the terms of the Copyright Less License,
+# see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
+
+OOPS() { { printf '%q OOPS:' "$(basename "$0")"; printf ' %q' "$@"; printf '\n'; } >&2; exit 23; }
+o() { "$@" || OOPS exec "$?:" "$@"; }
+
+[ 1 = $# ] || OOPS only a single argument supported
+
+CURRENT="$(pwd -P)"
+
+: realpath depth arg out returns: out
+realpath()
+{
+local depth="$[$1-1]" arg="$2"
+out="$3"
+
+case "$arg" in
+/*)	out=;;
+esac
+
+[ 0 -lt $depth ] || OOPS "$out/$arg" too many softlink recursions
+
+while [ -n "$arg" ]
+do
+	n="${arg%%/*}"
+	[ ".$n" = ".$arg" ] && arg=
+	arg="${arg#*/}"
+	[ ! -e "$out" ] || [ -d "$out" ] || OOPS "$out/$n" invalid as "$out" non-directory
+	case "$n" in
+	''|.)	continue;;
+	..)	out="${out%/*}"; continue;;
+	esac
+	out="$out/$n"
+	[ -L "$out" ] &&
+		n="$(readlink "$out")" &&
+		realpath "$depth" "$n" "${out%/*}"
+done
+[ -z "$out" ] && out=/
+}
+
+realpath 10 "$1" "$(pwd -P)"
+echo "$out"
+

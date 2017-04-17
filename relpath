@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# relpath SRC DST
+#
+# This Works is placed under the terms of the Copyright Less License,
+# see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
+
+OOPS() { { printf '%q OOPS:' "$(basename "$0")"; printf ' %q' "$@"; printf '\n'; } >&2; exit 23; }
+o() { "$@" || OOPS exec "$?:" "$@"; }
+
+[ 1 -lt "$#" ] || OOPS args needed: file relative..
+
+HERE="$(o dirname "$0")" || exit
+
+# get absolute paths
+SRC="$1"
+[ -d "$SRC" ] || SRC="$(dirname "$1")" || OOPS "$1" invalid
+_SRC="$("$HERE/realpath" "$SRC")/" || OOPS "$1" has no realpath
+
+withpath()
+{
+local a
+for a
+do
+	case "$a" in
+	*/*) continue;;
+	esac
+	return 1
+done
+return 0
+}
+
+shift
+for arg
+do
+	TRG="$("$HERE/realpath" "$arg")" || OOPS "$arg" invalid
+	[ -d "$TRG" ] && TRG="${TRG%/}/"
+	SRC="$_SRC"
+
+	# remove common prefix
+	while	[ -n "$SRC$TRG" ] && [ ."${SRC%%/*}" = ."${TRG%%/*}" ]
+	do
+		withpath "$SRC" && SRC="${SRC#*/}" || SRC=
+		withpath "$TRG" && TRG="${TRG#*/}" || TRG=
+	done
+
+	# append relative path to common dir
+	while	withpath "$SRC"
+	do
+		SRC="${SRC#*/}"
+		TRG="../$TRG"
+	done
+	echo "${TRG%/}"
+done
+

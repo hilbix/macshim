@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# readlink -[efm] file (see Linux)
+#
+# This Works is placed under the terms of the Copyright Less License,
+# see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
+
+OOPS() { { printf '%q OOPS:' "$(basename "$0")"; printf ' %q' "$@"; printf '\n'; } >&2; exit 23; }
+o() { "$@" || OOPS exec "$?:" "$@"; }
+
+case "$1" in
+(-[efm])	mode="${1#-}";;
+(*)		exec /usr/bin/readlink "$@";;
+esac
+
+HERE="$(o dirname "$0")" || exit
+
+shift
+case "$1" in
+--)	shift;;
+-*)	OOPS this shim does not support all options, sorry;;
+esac
+
+run-e()
+{
+[ -e "$1/$2" ] || OOPS "$1/$2" does not exist
+run-m "$@"
+}
+
+run-f()
+{
+[ -d "$1" ] || OOPS "$1" does not exist
+run-m "$@"
+}
+
+run-m()
+{
+o "$HERE/realpath" "$1/$2"
+}
+
+for arg
+do
+	d="$(dirname "$arg")" || OOPS "$arg" path is invalid
+	f="$(basename "$arg")" || OOPS "$arg" name is invalid
+	run-$mode "$d" "$f"
+done
+
