@@ -1,0 +1,100 @@
+#!/bin/bash
+#
+# As in Unix we ignore -t and -b, but just set the flags.
+# This is probably wrong under MacOS, as line ending is CR there.
+#
+# -b, --binary
+# -c, --check
+# -t, --text
+
+OOPS() { { printf '%q OOPS:' "$(basename "$0")"; printf ' %q' "$@"; printf '\n'; } >&2; exit 23; }
+
+check=false quiet=false status=false warn=false strict=false
+docheck()
+{
+md5="$(md5 -q -- "$2")" || { $quiet || echo "$2: FAIL"; let fails++; $status && exit 1; return; }
+[ "x$1" = "x$md5" ] && { $quiet || echo "$2: OK"; return; }
+let fails++
+$quiet || echo "$2: FAILED"
+$status && exit 1
+}
+
+fails=0
+ok=:
+check()
+{
+have=false
+while IFS='' read -r l
+do
+	a="${l%% *}"
+	b="${l#* }"
+	case "$a:${b:0:1}" in
+	(*[^a-f0-9]*:?)	;;
+	(????????????????????????????????:[\ \*])	have=:; docheck "$a" "${b:1}"; continue;;
+	esac
+	$warn && echo "Warn: malformed line: $a $b" >&2
+	$strict && { $quiet || echo "Error: malformed input" >&2; exit 1; }
+done
+}
+
+stdin() { md5 > >(read a && [ -n "$a" ] && echo "$a $c-"); }
+files() { [ 0 = $# ] || md5 -r -- "$@" > >(sed "s| | $c|"); }
+
+md5sum()
+{
+list=()
+for a
+do
+	if	[ x- = "x$a" ]
+	then
+		files "${list[@]}"
+		list=()
+		stdin
+	else
+		list+=("$a")
+	fi
+done
+files "${list[@]}"
+}
+
+flags=:
+files=()
+c=' '
+for a
+do
+	$flags &&
+	case "$a" in
+	(--)	flags=false; continue;;
+	(-b|--binary)	c='*'; continue;;
+	(-t|--text)	c=' '; continue;;
+	(-c|--check)	check=:; continue;;
+	(--quiet)	quiet=:; continue;;
+	(--status)	status=:; continue;;
+	(-w|--warn)	warn=:; continue;;
+	(--strict)	strict=:; continue;;
+	(--version|--help)	echo "$0 mac shim"; return 42;;
+	(-?*)	OOPS options are not supported: "$a";;
+	esac
+	files+=("$a")
+done
+
+[ 0 = "${#files[@]}" ] && files=(-)
+if	$check
+then
+	ok=:
+	for a in "${files[@]}"
+	do
+		if [ x- = "x$a" ]
+		then
+			check
+		else
+			check <"$a"
+		fi
+	done
+	$have || { ok=false; $quiet || echo "Warn: no valid line found" >&2; }
+	[ 0 = $fails ] || { ok=false; echo "WARNING: $fails checks failed" >&2; }
+	$ok
+else
+	md5sum "${files[@]}"
+fi
+

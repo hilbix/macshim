@@ -3,7 +3,7 @@
 # This Works is placed under the terms of the Copyright Less License,
 # see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
 
-BINS=ln readlink relpath realpath
+BINS=ln readlink relpath realpath md5sum
 BINDIR=$(HOME)/bin
 
 .PHONY: all install
