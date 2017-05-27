@@ -34,10 +34,12 @@ HERE="$(o dirname "$0")" || exit
 [ 1 -lt "$#" ] || OOPS option -s needs: src.. target
 
 TARG="${@:$#}"
+FILE=""
 
 if	[ ! -d "$TARG" ]
 then
 	[ 2 -ge "$#" ] || OOPS "$TARG" must be an existing directory
+	FILE="$(basename "$TARG")"
 	TARG="$(dirname "$TARG")"
 fi
 
@@ -48,5 +50,5 @@ do
 	OPTS+=("$SRC")
 done
 
-exec /bin/ln -s "${OPTS[@]}" "$TARG"
+exec /bin/ln -s "${OPTS[@]}" "$TARG/$FILE"
 
