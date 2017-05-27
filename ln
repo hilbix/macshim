@@ -37,7 +37,7 @@ TARG="${@:$#}"
 
 if	[ ! -d "$TARG" ]
 then
-	[ 2 -lt "$#" ] || OOPS "$TARG" must be an existing directory
+	[ 2 -ge "$#" ] || OOPS "$TARG" must be an existing directory
 	TARG="$(dirname "$TARG")"
 fi
 
