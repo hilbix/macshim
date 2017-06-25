@@ -8,6 +8,13 @@ BASH-Shims to implement limited support of some Linux-commands.
 - Very simple option parsing, so do not combine one letter options.
 - POSIX way of options parsing, options must strictly come before args.
 
+> This here is for being able to write scripts, which run under Mac and Linux the same way.
+> It is not meant to be able to run any Linux-script correctly under MacOS.
+>
+> So if you find some script which uses the commands a way which is not understood, and this can be fixed some way by changing the script, this is no bug here.
+> So the script must be made Mac-aware, which, thanks to this scrips, usually only means to reorder the arguments the POSIX way and properly split up single letter options.
+> (Doing things POSIXly correct improves things anyway.  Splitting up single letter arguments is an annoyance, but nevertheless removes complexity from scripts here.)
+
 ## Usage
 
 ```
@@ -26,6 +33,7 @@ Notes:
 
 ## Commands
 
+- `cp --backup=t src target` - copy with backing up destination before overwriting
 - `ln -s --relative src target` - do a relative softlink between two paths
 - `readlink -e thing` - get full real path of existing
 - `readlink -f thing` - as before, but allow missing last part
