@@ -7,7 +7,8 @@ BINS=ln readlink relpath realpath md5sum
 BINDIR=$(HOME)/bin
 
 .PHONY: all install
-all:	install
+all:
+	[ Darwine != "`uname`" ] || $(MAKE) install
 
 install:
 	mkdir -p -- '$(BINDIR)'
