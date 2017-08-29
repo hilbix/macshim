@@ -46,8 +46,10 @@ fi
 OPTS+=(--)
 for arg in "${@:1:$#-1}"
 do
+	argf="$(basename "$arg")"
+	arg="$(dirname "$arg")"	# only use dir-part
 	SRC="$("$HERE/relpath" "$TARG" "$arg")" || OOPS "$arg" cannot calculate relative path
-	OPTS+=("$SRC")
+	OPTS+=("$SRC${SRC:+/}$argf")
 done
 
 exec /bin/ln -s "${OPTS[@]}" "$TARG/$FILE"
