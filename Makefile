@@ -8,7 +8,7 @@ BINDIR=$(HOME)/bin
 
 .PHONY: all install
 all:
-	[ Darwine != "`uname`" ] || $(MAKE) install
+	[ Darwin != "`uname`" ] || $(MAKE) install
 
 install:
 	mkdir -p -- '$(BINDIR)'
