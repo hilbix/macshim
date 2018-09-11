@@ -1,0 +1,6 @@
+osx_instance:
+  image: high-sierra-xcode-9.4.1
+
+task:
+  script: make
+
