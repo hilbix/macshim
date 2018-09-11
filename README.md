@@ -1,4 +1,6 @@
-# Mac Shim
+[![MacShim dev Test Status](https://api.cirrus-ci.com/github/hilbix/macshim.svg?branch=dev)](https://cirrus-ci.com/github/hilbix/macshim/dev)
+
+# MAC Shim
 
 BASH-Shims to implement limited support of some Linux-commands.
 (Those I need which have some missing options on Mac.)
