@@ -24,6 +24,5 @@ clean distclean:
 
 .PHONY:	test
 test:
-	ls -al '$(BINDIR)'
 	./tests.sh '$(BINDIR)'
 
