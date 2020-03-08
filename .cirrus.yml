@@ -1,7 +1,9 @@
-osx_instance:
-  image: high-sierra-xcode-9.4.1
-
 task:
+  matrix:
+    - osx_instance:
+        image: catalina-xcode
+    - container:
+        image: gcc:latest
   setup_script: make
   test_script: make test
 
